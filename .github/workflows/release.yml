@@ -31,7 +31,9 @@ jobs:
       - name: Prepare binary for upload
         run: |
           mkdir -p release-assets
-          cp bazel-bin/cmd/launcher/${{ matrix.target }}_/${{ matrix.target }} release-assets/task-runner-launcher
+          # Get the actual Bazel output path
+          OUTPUT_PATH=$(bazel info output_path)
+          cp $OUTPUT_PATH/bin/cmd/launcher/${{ matrix.target }}_/${{ matrix.target }} release-assets/task-runner-launcher
           chmod +x release-assets/task-runner-launcher
           
           # Generate SHA256 sum
