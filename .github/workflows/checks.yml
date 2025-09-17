@@ -6,6 +6,12 @@ on:
     branches:
       - main
 
+# Sets permissions for GitHub Pages deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -30,13 +36,34 @@ jobs:
       - name: Test with Coverage
         run: bazel coverage //...
 
-      - name: Generate Coverage Report
+      - name: Install lcov for HTML report generation
+        run: sudo apt-get install -y lcov
+
+      - name: Generate HTML Coverage Report
         run: |
           TESTLOGS_DIR=$(bazel info bazel-testlogs)
+          mkdir -p coverage-html
           find "$TESTLOGS_DIR" -name "coverage.dat" -exec cat {} \; > coverage.out
+          genhtml coverage.out --output-directory coverage-html --title "Code Coverage Report"
 
-      - name: Upload test coverage report
-        uses: codecov/codecov-action@v4.5.0
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        if: github.ref == 'refs/heads/main'
+
+      - name: Upload coverage report to GitHub Pages
+        uses: actions/upload-pages-artifact@v4
+        if: github.ref == 'refs/heads/main'
         with:
-          file: ./coverage.out
-          token: ${{ secrets.CODECOV_TOKEN }}
+          path: './coverage-html'
+
+  deploy-pages:
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
