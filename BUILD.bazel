@@ -1,0 +1,36 @@
+load("@gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix task-runner-launcher
+gazelle(name = "gazelle")
+
+gazelle(
+    name = "gazelle-update-repos",
+    args = [
+        "-from_file=go.mod",
+        "-to_macro=go_deps.bzl%go_dependencies",
+        "-prune",
+    ],
+    command = "update-repos",
+)
+
+# Primary aliases (HERMETIC - no local Go required!)
+alias(
+    name = "fmt",
+    actual = "//tools/gofmt",  # Uses Bazel's Go toolchain!
+)
+
+alias(
+    name = "lint",
+    actual = "//tools/golint",  # Uses Bazel's Go toolchain!
+)
+
+# Coverage and testing aliases
+alias(
+    name = "coverage",
+    actual = "//tools/gocov",  # Generate coverage report (LCOV format)
+)
+
+alias(
+    name = "test-coverage",
+    actual = "//tools/gocov",  # Same as coverage (Makefile compatibility)
+)
