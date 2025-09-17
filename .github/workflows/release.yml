@@ -35,17 +35,19 @@ jobs:
           mkdir -p release-assets
           # Get the actual Bazel output path
           OUTPUT_PATH=$(bazel info output_path)
-          cp $OUTPUT_PATH/k8-fastbuild/bin/cmd/launcher/${{ matrix.target }}_/${{ matrix.target }} release-assets/task-runner-launcher
-          chmod +x release-assets/task-runner-launcher
+          BINARY_NAME=task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }}
+          cp $OUTPUT_PATH/k8-fastbuild/bin/cmd/launcher/${{ matrix.target }}_/${{ matrix.target }} release-assets/$BINARY_NAME
+          chmod +x release-assets/$BINARY_NAME
           
           # Generate SHA256 sum
           cd release-assets
-          sha256sum task-runner-launcher > task-runner-launcher.sha256
+          sha256sum $BINARY_NAME > $BINARY_NAME.sha256
 
       - name: Upload Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          BINARY_NAME=task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }}
           gh release upload ${{ github.event.release.tag_name }} \
-            release-assets/task-runner-launcher#task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }} \
-            release-assets/task-runner-launcher.sha256#task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
+            release-assets/$BINARY_NAME \
+            release-assets/$BINARY_NAME.sha256
