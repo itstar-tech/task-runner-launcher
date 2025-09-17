@@ -33,7 +33,7 @@ jobs:
           mkdir -p release-assets
           # Get the actual Bazel output path
           OUTPUT_PATH=$(bazel info output_path)
-          cp $OUTPUT_PATH/bin/cmd/launcher/${{ matrix.target }}_/${{ matrix.target }} release-assets/task-runner-launcher
+          cp $OUTPUT_PATH/k8-fastbuild/bin/cmd/launcher/${{ matrix.target }}_/${{ matrix.target }} release-assets/task-runner-launcher
           chmod +x release-assets/task-runner-launcher
           
           # Generate SHA256 sum
