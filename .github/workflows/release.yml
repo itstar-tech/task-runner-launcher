@@ -5,6 +5,8 @@ on:
 jobs:
   releases-matrix:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
@@ -40,22 +42,10 @@ jobs:
           cd release-assets
           sha256sum task-runner-launcher > task-runner-launcher.sha256
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1.0.2
+      - name: Upload Release Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: release-assets/task-runner-launcher
-          asset_name: task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }}
-          asset_content_type: application/octet-stream
-
-      - name: Upload SHA256 Asset
-        uses: actions/upload-release-asset@v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: release-assets/task-runner-launcher.sha256
-          asset_name: task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
-          asset_content_type: text/plain
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} \
+            release-assets/task-runner-launcher#task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }} \
+            release-assets/task-runner-launcher.sha256#task-runner-launcher-${{ matrix.goos }}-${{ matrix.goarch }}.sha256
